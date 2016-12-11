@@ -1,29 +1,12 @@
-FROM amostsai/ubuntu_base
+FROM mysql
 
-MAINTAINER Amos Tsai <amos.tsai@gmail.com>
-
-ENV DEBIAN_FRONTEND noninteractive \
-	MYSQL_USER=mysql \
-    MYSQL_DATA_DIR=/var/lib/mysql \
-    MYSQL_RUN_DIR=/run/mysqld \
-    MYSQL_LOG_DIR=/var/log/mysql
-
-RUN \
-	apt-get update && \
-	apt-get -y upgrade && \
-	apt-get install -y mysql-server
-
-RUN	\
-	# Clean up
-	rm -rf ${MYSQL_DATA_DIR} && \
-	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-	apt-get autoremove -y && \
-	apt-get clean
-	
-
-#VOLUME /var/lib/mysql
-VOLUME ["${MYSQL_DATA_DIR}", "${MYSQL_RUN_DIR}"]
-
-EXPOSE 3306
-
-CMD ["mysqld_safe"]
+# Copy the database initialize script: 
+# Contents of /docker-entrypoint-initdb.d are run on mysqld startup
+ADD  docker-entrypoint-initdb.d/ /docker-entrypoint-initdb.d/
+ADD  my.cnf /etc/mysql/my.cnf
+ 
+# Default values for passwords and database name. Can be overridden on docker run
+ENV MYSQL_ROOT_PASSWORD=my-secret-pw
+ENV MYSQL_DATABASE=test
+ENV MYSQL_USER=test
+ENV MYSQL_PASSWORD=test
